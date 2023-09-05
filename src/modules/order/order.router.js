@@ -23,5 +23,4 @@ router.patch(
 
 router.post('/webhook', express.raw({type: 'application/json'}), orderController.webhook);
 
-app.listen(4242, () => console.log('Running on port 4242'));
 export default router;
