@@ -179,7 +179,7 @@ export const webhook = asyncHandler(async (request, response) => {
 
   // Handle the event
   const orderId = event.data.object.metadata.order_id;
-
+  console.log(orderId);
   if (event.type === "checkout.session.completed") {
     await orderModel.findOneAndUpdate(
       { _id: orderId },
