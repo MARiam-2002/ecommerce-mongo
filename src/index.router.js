@@ -31,7 +31,13 @@ export const bootstrap = (app, express) => {
   //   return next();
   // });
 
-  app.use(express.json());
+  app.use((req, res, next) => {
+    if (req.originalUrl === "order/webhook") {
+      return next();
+    }
+    express.json()(req, res, next);
+  });
+
   app.use("/auth", authRouter);
   app.use("/category", categoryRouter);
   app.use("/subCategory", subCategoryRouter);
