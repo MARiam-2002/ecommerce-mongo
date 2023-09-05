@@ -83,7 +83,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
   const { secure_url, public_id } = await cloudinary.uploader.upload(pdfPath, {
     folder: `${process.env.FOLDER_CLOUDINARY}/order/invoice/${user._id}`,
   });
-   fs.unlinkSync(pdfPath);
+
   order.invoice = { id: public_id, url: secure_url };
   await order.save();
 
@@ -101,6 +101,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
     updateStock(order.products, true);
     clearCart(user._id);
   }
+  fs.unlinkSync(pdfPath);
 
   if (payment === "visa") {
     const stripe = new Stripe(process.env.STRIPE_KEY);
@@ -115,6 +116,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
+      metadata: { order_id: order.id },
       mode: "payment",
       success_url: process.env.SUCCESS_URL,
       cancel_url: process.env.CANCEL_URL,
@@ -123,7 +125,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
           price_data: {
             currency: "EGP",
             product_data: { name: product.name },
-            unit_amount: product.itemPrice*100,
+            unit_amount: product.itemPrice * 100,
           },
           quantity: product.quantity,
         };
@@ -156,4 +158,38 @@ export const cancelOrder = asyncHandler(async (req, res, next) => {
     success: true,
     message: "order canceled successfully!",
   });
+});
+
+export const webhook = asyncHandler(async (request, response) => {
+  const stripe = new Stripe(process.env.STRIPE_KEY);
+  const sig = request.headers["stripe-signature"];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      request.body,
+      sig,
+      process.env.END_POINT_SECRT
+    );
+  } catch (err) {
+    response.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+
+  // Handle the event
+  const orderId = event.data.object.metadata.order_id;
+
+  if (event.type === "checkout.session.completed") {
+    await orderModel.findOneAndUpdate(
+      { _id: orderId },
+      { status: "visa payed" }
+    );
+    return;
+  }
+  await orderModel.findOneAndUpdate(
+    { _id: orderId },
+    { status: "failed to pay" }
+  );
+  return;
 });
