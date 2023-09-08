@@ -8,6 +8,7 @@ import cartRouter from "./modules/cart/cart.router.js";
 import reviewRouter from "./modules/review/review.router.js";
 import orderRouter from "./modules/order/order.router.js";
 import { globalErrorHandling } from "./utils/asyncHandler.js";
+import cors from "cors";
 import morgan from "morgan";
 
 export const bootstrap = (app, express) => {
@@ -31,7 +32,7 @@ export const bootstrap = (app, express) => {
   //   res.setHeader("Access-Control-Allow-Private-Network", true);
   //   return next();
   // });
-
+  app.use(cors());
   app.use((req, res, next) => {
     console.log(req.originalUrl);
     if (req.originalUrl.includes("/order/webhook")) {
