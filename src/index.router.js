@@ -5,6 +5,7 @@ import brandRouter from "./modules/brand/brand.router.js";
 import productRouter from "./modules/product/product.router.js";
 import couponRouter from "./modules/coupon/coupon.router.js";
 import cartRouter from "./modules/cart/cart.router.js";
+import reviewRouter from "./modules/review/review.router.js";
 import orderRouter from "./modules/order/order.router.js";
 import { globalErrorHandling } from "./utils/asyncHandler.js";
 import morgan from "morgan";
@@ -32,7 +33,7 @@ export const bootstrap = (app, express) => {
   // });
 
   app.use((req, res, next) => {
-    if (req.originalUrl === "order/webhook") {
+    if (req.originalUrl === "/order/webhook") {
       return next();
     }
     express.json()(req, res, next);
@@ -46,6 +47,7 @@ export const bootstrap = (app, express) => {
   app.use("/coupon", couponRouter);
   app.use("/cart", cartRouter);
   app.use("/order", orderRouter);
+  app.use("/review", reviewRouter);
   app.all("*", (req, res, next) => {
     return next(new Error("not found page", { cause: 404 }));
   });

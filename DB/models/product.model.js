@@ -2,6 +2,7 @@ import mongoose, { Schema, Types, model } from "mongoose";
 
 const productSchema = new Schema(
   {
+    reviews: [{ id: { type: Types.ObjectId, ref: "Review" } }],
     name: {
       type: String,
       min: 2,
