@@ -11,6 +11,8 @@ import cloudinary from "../../../utils/cloud.js";
 import { sendEmail } from "../../../utils/sendEmails.js";
 import { clearCart, updateStock } from "../order.service.js";
 import Stripe from "stripe";
+const stripe = new Stripe(process.env.STRIPE_KEY);
+
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 export const createOrder = asyncHandler(async (req, res, next) => {
   const { payment, address, phone, coupon } = req.body;
@@ -104,7 +106,6 @@ export const createOrder = asyncHandler(async (req, res, next) => {
   fs.unlinkSync(pdfPath);
 
   if (payment === "visa") {
-    const stripe = new Stripe(process.env.STRIPE_KEY);
 
     let existCoupon;
     if (order.coupon !== undefined) {
@@ -161,35 +162,30 @@ export const cancelOrder = asyncHandler(async (req, res, next) => {
   });
 });
 
-export const webhook = asyncHandler(async (request, response) => {
-  const stripe = new Stripe(process.env.STRIPE_KEY);
+export const webhook = async (request, res) => {
   const sig = request.headers["stripe-signature"];
 
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(
-      request.body,
-      sig,
-      process.env.END_POINT_SECRT
-    );
-  } catch (err) {
-    response.status(400).send(`Webhook Error: ${err.message}`);
-    return;
-  }
+  let event = stripe.webhooks.constructEvent(
+    request.body,
+    sig,
+    process.env.END_POINT_SECRT
+  );
 
   // Handle the event
+  console.log(0);
   const orderId = event.data.object.metadata.order_id;
   if (event.type === "checkout.session.completed") {
     await orderModel.findOneAndUpdate(
       { _id: orderId },
       { status: "visa payed" }
     );
-    return;
+    console.log(1);
+    return res.json({ message: "Done" });
   }
   await orderModel.findOneAndUpdate(
     { _id: orderId },
     { status: "failed to pay" }
   );
-  return;
-});
+  console.log(2);
+  return res.json({ message: "Failed" });
+};

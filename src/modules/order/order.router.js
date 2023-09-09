@@ -20,7 +20,10 @@ router.patch(
   orderController.cancelOrder
 );
 
-
-router.post('/webhook', express.raw({type: 'application/json'}), orderController.webhook);
+router.post(
+  "/webhook",
+  express.raw({ type: "application/json" }),
+  orderController.webhook
+);
 
 export default router;

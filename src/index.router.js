@@ -35,10 +35,11 @@ export const bootstrap = (app, express) => {
   app.use(cors());
   app.use((req, res, next) => {
     console.log(req.originalUrl);
-    if (req.originalUrl.includes("/order/webhook")) {
-      return next();
+    if (req.originalUrl == "/order/webhook") {
+      next();
+    } else {
+      express.json()(req, res, next);
     }
-    express.json()(req, res, next);
   });
 
   app.use("/auth", authRouter);
@@ -51,6 +52,7 @@ export const bootstrap = (app, express) => {
   app.use("/order", orderRouter);
   app.use("/review", reviewRouter);
   app.all("*", (req, res, next) => {
+    console.log(3);
     return next(new Error("not found page", { cause: 404 }));
   });
 

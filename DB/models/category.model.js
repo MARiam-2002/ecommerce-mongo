@@ -1,4 +1,5 @@
 import mongoose, { Schema, Types, model } from "mongoose";
+import subCategoryModel from "./subcategory.model.js";
 
 const categorySchema = new Schema(
   {
@@ -27,10 +28,12 @@ const categorySchema = new Schema(
       ref: "User",
       required: true,
     },
-    brandId:[{
-      type: Types.ObjectId,
-      ref: "Brand",
-    }],
+    brandId: [
+      {
+        type: Types.ObjectId,
+        ref: "Brand",
+      },
+    ],
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
@@ -40,6 +43,8 @@ categorySchema.virtual("subcategory", {
   localField: "_id",
   foreignField: "categoryId",
 });
+
+
 
 const categoryModel =
   mongoose.models.categoryModel || model("Category", categorySchema);
