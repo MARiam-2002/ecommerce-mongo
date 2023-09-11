@@ -29,7 +29,7 @@ export const register = asyncHandler(async (req, res, next) => {
     activationCode,
   });
 
-  const link = `http://localhost:3000/auth/confirmEmail/${activationCode}`;
+  const link = `https://ecommerce-mongo.vercel.app/auth/auth/confirmEmail/${activationCode}`;
 
   const isSent = await sendEmail({
     to: email,
