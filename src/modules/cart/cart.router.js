@@ -14,18 +14,17 @@ router.post(
 router.get("/", isAuthenticated, cartController.getProductInCart);
 
 router.patch("/clear", isAuthenticated, cartController.clearCart);
-
-router.patch(
-  "/:productId",
-  isAuthenticated,
-  isValidation(validators.removeProductFromCart),
-  cartController.removeProductFromCart
-);
 router.patch(
   "/",
   isAuthenticated,
   isValidation(validators.cartSchema),
   cartController.updateCart
+);
+router.patch(
+  "/:productId",
+  isAuthenticated,
+  isValidation(validators.removeProductFromCart),
+  cartController.removeProductFromCart
 );
 
 export default router;
